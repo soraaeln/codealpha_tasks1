@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Favourites - Florista</title>
+
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<section class="wishlist-section">
+
+  <div class="wishlist-header">
+
+    <h2 class="section-title">
+      My Favourites
+
+      <span class="wishlist-count">
+        {{ wishlist_items|length }}
+      </span>
+    </h2>
+
+    <p class="wishlist-sub">
+      Your most loved floral selections saved beautifully.
+    </p>
+
+  </div>
+
+  {% if wishlist_items %}
+
+  <div class="wishlist-grid">
+
+    {% for item in wishlist_items %}
+
+    <div class="wishlist-card">
+
+      <div class="wishlist-img">
+
+        {% if item.product.image %}
+          <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+        {% else %}
+          <img src="{% static 'images/default-flower.jpg' %}" alt="Flower">
+        {% endif %}
+
+      </div>
+
+      <div class="wishlist-body">
+
+        <div class="wishlist-category">
+          {{ item.product.category.name }}
+        </div>
+
+        <h3 class="wishlist-name">
+          {{ item.product.name }}
+        </h3>
+
+        <div class="wishlist-price">
+          Rs. {{ item.product.price }}
+        </div>
+
+        <div class="wishlist-actions">
+
+          <form method="post"
+                action="{% url 'toggle_wishlist' item.product.id %}"
+                style="width:100%;">
+
+            {% csrf_token %}
+
+            <button type="submit"
+                    class="wishlist-btn remove-btn">
+
+              Remove
+
+            </button>
+
+          </form>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    {% endfor %}
+
+  </div>
+
+  <div class="wishlist-bottom">
+
+    <a href="{% url 'home' %}" class="shop-btn">
+      Continue Shopping
+    </a>
+
+  </div>
+
+  {% else %}
+
+  <div class="wishlist-empty">
+
+    <div class="wishlist-empty-icon">
+      💖
+    </div>
+
+    <h3>No Favourites Yet</h3>
+
+    <p>
+      Save your favourite floral arrangements and they will appear here beautifully.
+    </p>
+
+    <a href="{% url 'home' %}" class="shop-btn">
+      Explore Flowers
+    </a>
+
+  </div>
+
+  {% endif %}
+
+</section>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Cart - Florista</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <section class="section" style="max-width:1100px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;">
+      <h2 class="section-title">My Cart</h2>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button class="btn-signin" type="submit">Logout</button>
+      </form>
+    </div>
+    {% if cart_items %}
+      <div class="products-grid" style="margin-top:24px;grid-template-columns:1fr;gap:16px;">
+        {% for item in cart_items %}
+        <div class="product-card">
+          <div class="product-body" style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+            <div>
+              <div class="product-name">{{ item.product.name }}</div>
+              <div class="product-type">{{ item.product.category.name }}</div>
+              <div class="product-price">Rs. {{ item.product.price }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <form method="post" action="{% url 'update_cart_quantity' item.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="decrease">
+                <button type="submit" class="btn-signin">-</button>
+              </form>
+              <span style="min-width:26px;text-align:center;font-weight:600;">{{ item.quantity }}</span>
+              <form method="post" action="{% url 'update_cart_quantity' item.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="increase">
+                <button type="submit" class="btn-signin">+</button>
+              </form>
+            </div>
+            <div>
+              <div class="product-price">Rs. {{ item.line_total }}</div>
+              <form method="post" action="{% url 'remove_from_cart' item.id %}" style="margin-top:8px;">
+                {% csrf_token %}
+                <button type="submit" class="btn-signin">Remove</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div style="margin-top:24px;padding:16px;border:1px solid #f0d0d8;border-radius:14px;background:#fff;">
+        <p style="font-weight:600;font-size:18px;">Cart Total: Rs. {{ cart_total }}</p>
+        <a href="{% url 'checkout' %}" class="btn-signup" style="margin-top:10px;display:inline-block;">
+  Proceed to Checkout
+</a>
+      </div>
+    {% else %}
+      <p style="margin-top:20px;">Your cart is empty.</p>
+    {% endif %}
+    <p style="margin-top:20px;"><a class="btn-signup" href="{% url 'home' %}">Continue Shopping</a></p>
+  </section>
+</body>
+</html>

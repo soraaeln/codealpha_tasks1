@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout - Florista</title>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<section class="checkout-section">
+
+  <h2 class="checkout-title">Checkout</h2>
+
+  <div class="checkout-card">
+
+    <h3 style="margin-bottom:20px; color:var(--text-dark); font-family: 'Cormorant Garamond', serif;">Order Details</h3>
+
+    <form method="post" class="checkout-form">
+      {% csrf_token %}
+
+      <div class="checkout-form-group">
+        <label for="full_name">Full Name</label>
+        <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required class="checkout-input">
+      </div>
+
+      <div class="checkout-form-group">
+        <label for="phone">Phone Number</label>
+        <input type="text" id="phone" name="phone" placeholder="Enter your phone number" required class="checkout-input">
+      </div>
+
+      <div class="checkout-form-group">
+        <label for="address">Address</label>
+        <input type="text" id="address" name="address" placeholder="Enter your address" required class="checkout-input">
+      </div>
+
+      <div class="checkout-form-group">
+        <label for="city">City</label>
+        <input type="text" id="city" name="city" placeholder="Enter your city" required class="checkout-input">
+      </div>
+
+      <div class="checkout-form-group">
+        <label for="payment_method">Payment Method</label>
+        <select id="payment_method" name="payment_method" class="checkout-select">
+          <option value="cod">Cash on Delivery</option>
+        </select>
+      </div>
+
+      <hr style="margin:30px 0; border:none; border-top:1px solid var(--border);">
+
+      <div class="checkout-summary">
+
+        <h3>Order Summary</h3>
+
+        <div class="checkout-summary-row">
+          <span>Total Items:</span>
+          <span>{{ cart_items|length }}</span>
+        </div>
+
+        <div class="checkout-summary-row">
+          <span>Subtotal:</span>
+          <span>Rs. {{ total }}</span>
+        </div>
+
+        <div class="checkout-summary-total">
+          <span>Total:</span>
+          <span>Rs. {{ total }}</span>
+        </div>
+
+      </div>
+
+      <button type="submit" class="checkout-btn">Place Order</button>
+
+    </form>
+
+  </div>
+
+  <p style="margin-top:20px;">
+    <a href="{% url 'cart' %}" class="checkout-back-link">← Back to Cart</a>
+  </p>
+
+</section>
+
+</body>
+</html>

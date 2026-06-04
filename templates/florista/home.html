@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FLORISTA - Fresh Flowers Delivered</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+</head>
+<body>
+
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <!-- Mobile hamburger -->
+      <button class="hamburger" id="menuBtn" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <a href="#" class="logo">FLORIST<span>A</span></a>
+
+      <nav>
+        <a href="#" class="active">Home</a>
+        <a href="#shop">Shop</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Search -->
+        <button class="icon-btn" id="searchBtn" title="Search" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <!-- Favourites -->
+        <a class="icon-btn" href="{% url 'wishlist' %}" title="Favourites" aria-label="Favourites">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </a>
+        <!-- Cart -->
+        <a class="icon-btn" href="{% url 'cart' %}" title="Cart" aria-label="Cart" style="position:relative;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <span class="cart-badge" id="cartBadge">{{ cart_count }}</span>
+        </a>
+        <!-- User/Me -->
+        <button class="icon-btn" title="My Account" aria-label="My Account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </button>
+
+        <div class="auth-btns">
+          {% if customer_authenticated %}
+          <a class="btn-signin" href="{% url 'cart' %}">Hi, {{ customer.username }}</a>
+          <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button class="btn-signup" type="submit">Logout</button>
+          </form>
+          {% else %}
+          <a class="btn-signin" href="{% url 'login' %}">Sign In</a>
+          <a class="btn-signup" href="{% url 'signup' %}">Sign Up</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#">Home</a>
+      <a href="#shop">Shop</a>
+      <a href="#about">About Us</a>
+      <a href="#contact">Contact</a>
+      <div class="mobile-auth">
+        {% if customer_authenticated %}
+        <a class="btn-signin" href="{% url 'cart' %}" style="text-align:center;">Hi, {{ customer.username }}</a>
+        <form method="post" action="{% url 'logout' %}" style="width:100%;">
+          {% csrf_token %}
+          <button class="btn-signup" type="submit" style="width:100%;">Logout</button>
+        </form>
+        {% else %}
+        <a class="btn-signin" href="{% url 'login' %}" style="text-align:center;">Sign In</a>
+        <a class="btn-signup" href="{% url 'signup' %}" style="text-align:center;">Sign Up</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  {% if messages %}
+  <div style="max-width:1280px;margin:12px auto 0;padding:0 24px;">
+    {% for message in messages %}
+    <div style="background:#fff;border:1px solid #f0d0d8;border-radius:10px;padding:10px 14px;margin-bottom:8px;color:#6b3a4a;">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- SEARCH OVERLAY -->
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-box">
+      <div class="search-input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c2637a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Search flowers, bouquets, plants..." autocomplete="off"/>
+        <button class="search-close" id="searchClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="search-label" id="searchLabel">Popular Searches</div>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+  </div>
+
+  <!-- FAVOURITES/CART OVERLAY -->
+  <div class="search-overlay" id="listOverlay">
+    <div class="search-box">
+      <div class="search-input-wrap" style="margin-bottom:12px;">
+        <strong id="listTitle" style="color:#6b3a4a;">My Items</strong>
+        <button class="search-close" id="listClose" aria-label="Close">&times;</button>
+      </div>
+      <div class="search-results" id="listResults"></div>
+    </div>
+  </div>
+
+  <!-- SIGN IN / SIGN UP MODAL -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+      <div class="modal-logo">FLORISTA</div>
+      <p class="modal-sub">Your favorite flower shop</p>
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabSignin">Sign In</button>
+        <button class="modal-tab" id="tabSignup">Sign Up</button>
+      </div>
+      <!-- Sign In Form -->
+      <div id="formSignin">
+        <div class="modal-form">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" placeholder="you@example.com"/>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" placeholder="Enter your password"/>
+          </div>
+          <button class="form-submit" style="margin-top:4px;">Sign In</button>
+        </div>
+        <p class="modal-link">Forgot password? <a href="#">Reset here</a></p>
+      </div>
+      <!-- Sign Up Form -->
+      <div id="formSignup" style="display:none;">
+        <div class="modal-form">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" placeholder="Your full name"/>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" placeholder="you@example.com"/>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" placeholder="Create a password"/>
+          </div>
+          <button class="form-submit" style="margin-top:4px;">Create Account</button>
+        </div>
+        <p class="modal-link">Already have an account? <a href="#" id="switchToSignin">Sign In</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <!-- Petals -->
+    <div class="hero-petal" style="left:10%;bottom:-20px;width:10px;height:15px;animation-duration:8s;animation-delay:0s;"></div>
+    <div class="hero-petal" style="left:25%;bottom:-20px;animation-duration:11s;animation-delay:2s;"></div>
+    <div class="hero-petal" style="left:60%;bottom:-20px;width:8px;height:12px;animation-duration:9s;animation-delay:4s;"></div>
+    <div class="hero-petal" style="left:80%;bottom:-20px;animation-duration:13s;animation-delay:1s;"></div>
+    <div class="hero-petal" style="left:45%;bottom:-20px;width:14px;height:20px;animation-duration:10s;animation-delay:3s;"></div>
+    <div class="hero-bg-circle c1"></div>
+    <div class="hero-bg-circle c2"></div>
+
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-tag">
+          <span class="hero-tag-dot"></span>
+          Fresh Flowers, Same Day Delivery
+        </div>
+        <h1 class="hero-title">
+          Send Love<br/>with Every<br/><em>Petal</em>
+        </h1>
+        <p class="hero-desc">
+          Handcrafted bouquets and arrangements made with the freshest blooms, 
+          delivered to your door with care and elegance.
+        </p>
+        <div class="hero-cta">
+          <a href="#shop" class="btn-primary">Explore Collection</a>
+          <a href="#about" class="btn-ghost">Our Story</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-num">5k+</div>
+            <div class="stat-label">Happy Customers</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">200+</div>
+            <div class="stat-label">Flower Varieties</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">4.9</div>
+            <div class="stat-label">Average Rating</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-image">
+        <div class="hero-img-card">
+          <svg viewBox="0 0 420 525" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <defs>
+              <radialGradient id="bg1" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#f5c6d0"/>
+                <stop offset="100%" stop-color="#fce8ed"/>
+              </radialGradient>
+            </defs>
+            <rect width="420" height="525" fill="url(#bg1)"/>
+            <!-- Stem -->
+            <line x1="210" y1="480" x2="210" y2="290" stroke="#6b9e6b" stroke-width="5" stroke-linecap="round"/>
+            <line x1="210" y1="400" x2="170" y2="360" stroke="#6b9e6b" stroke-width="4" stroke-linecap="round"/>
+            <line x1="210" y1="370" x2="250" y2="330" stroke="#6b9e6b" stroke-width="4" stroke-linecap="round"/>
+            <!-- Leaves -->
+            <ellipse cx="155" cy="355" rx="28" ry="14" fill="#7dbf7d" transform="rotate(-35,155,355)"/>
+            <ellipse cx="265" cy="325" rx="28" ry="14" fill="#7dbf7d" transform="rotate(35,265,325)"/>
+            <!-- Petals -->
+            <ellipse cx="210" cy="220" rx="28" ry="70" fill="#e8899a" opacity="0.9" transform="rotate(0,210,280)"/>
+            <ellipse cx="210" cy="220" rx="28" ry="70" fill="#e8899a" opacity="0.85" transform="rotate(45,210,280)"/>
+            <ellipse cx="210" cy="220" rx="28" ry="70" fill="#e8899a" opacity="0.85" transform="rotate(90,210,280)"/>
+            <ellipse cx="210" cy="220" rx="28" ry="70" fill="#e8899a" opacity="0.85" transform="rotate(135,210,280)"/>
+            <ellipse cx="210" cy="220" rx="28" ry="70" fill="#c2637a" opacity="0.8" transform="rotate(22,210,280)"/>
+            <ellipse cx="210" cy="220" rx="28" ry="70" fill="#c2637a" opacity="0.8" transform="rotate(67,210,280)"/>
+            <ellipse cx="210" cy="220" rx="28" ry="70" fill="#c2637a" opacity="0.8" transform="rotate(112,210,280)"/>
+            <ellipse cx="210" cy="220" rx="28" ry="70" fill="#c2637a" opacity="0.8" transform="rotate(157,210,280)"/>
+            <!-- Center -->
+            <circle cx="210" cy="280" r="26" fill="#f5c6d0"/>
+            <circle cx="210" cy="280" r="16" fill="#e8899a"/>
+            <circle cx="210" cy="280" r="8" fill="#c2637a"/>
+            <!-- Decorative dots -->
+            <circle cx="80" cy="80" r="40" fill="#f5c6d0" opacity="0.4"/>
+            <circle cx="340" cy="440" r="55" fill="#f5c6d0" opacity="0.3"/>
+            <circle cx="360" cy="100" r="25" fill="#e8899a" opacity="0.2"/>
+          </svg>
+        </div>
+        <div class="hero-float-card hfc-top">
+          <div class="hfc-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div>
+            <div class="hfc-title">Best Seller</div>
+            <div class="hfc-sub">Rose Bouquet</div>
+          </div>
+        </div>
+        <div class="hero-float-card hfc-bottom">
+          <div class="hfc-big">Rs. 999</div>
+          <div class="hfc-sm">Starting Price</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <div id="shop">
+    <section class="section">
+      <div class="section-header reveal">
+        <div class="section-tag">Browse by Category</div>
+        <h2 class="section-title">Find the Perfect Flowers</h2>
+        <p class="section-desc">From romantic roses to cheerful sunflowers, we have it all.</p>
+      </div>
+      <div class="categories-grid">
+        {% for category in categories %}
+        <a href="#" class="cat-card reveal">
+          <div class="cat-img">
+            {% if category.image %}
+              <img src="{{ category.image.url }}" alt="{{ category.name }}" style="width:100%; height:100%; object-fit: cover;" />
+            {% else %}
+              <svg width="70" height="70" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#f5c6d0"/><circle cx="50" cy="50" r="20" fill="#e8899a" opacity="0.7"/></svg>
+            {% endif %}
+          </div>
+          <div class="cat-body">
+            <div class="cat-name">{{ category.name }}</div>
+            <div class="cat-count">{{ category.product_count }} varieties</div>
+          </div>
+        </a>
+        {% empty %}
+        <p>No categories available yet.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="products-wrap">
+    <section class="section" style="padding-top:0;">
+      <div class="section-header reveal" style="padding-top:80px;">
+        <div class="section-tag">Featured Products</div>
+        <h2 class="section-title">Our Bestselling Bouquets</h2>
+        <p class="section-desc">Each arrangement is crafted with love by our expert florists.</p>
+      </div>
+      <div class="products-grid">
+        {% for product in products %}
+        <div class="product-card reveal" id="product-{{ product.id }}" data-product-id="{{ product.id }}">
+          <div class="product-img-wrap">
+            {% if product.has_discount %}
+            <span class="product-badge">{{ product.discount_percentage }}% OFF</span>
+            {% endif %}
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width:100%; height:100%; object-fit: cover;" />
+            {% else %}
+            <svg width="90" height="90" viewBox="0 0 100 100"><circle cx="50" cy="50" r="32" fill="#f5c6d0"/><circle cx="50" cy="50" r="18" fill="#e8899a" opacity="0.7"/></svg>
+            {% endif %}
+            <form method="post" action="{% url 'toggle_wishlist' product.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button class="product-fav {% if product.id in wishlist_product_ids %}active{% endif %}" type="submit">
+                <svg viewBox="0 0 24 24" fill="{% if product.id in wishlist_product_ids %}#c2637a{% else %}none{% endif %}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </button>
+            </form>
+          </div>
+          <div class="product-body">
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-type">{{ product.category.name }}</div>
+            {% if product.description %}
+            <div class="product-desc">{{ product.description|truncatechars:80 }}</div>
+            {% endif %}
+            <div class="product-footer">
+              <div class="product-price">
+                Rs. {{ product.price }}
+                {% if product.has_discount %}
+                <span>Rs. {{ product.original_price }}</span>
+                {% endif %}
+              </div>
+              <form method="post" action="{% url 'add_to_cart' product.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="add-cart" type="submit">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p>No products available yet.</p>
+        {% endfor %}
+      </div>    </section>
+  </div>
+
+  <!-- PROMO BANNER -->
+  <div style="max-width:1280px;margin:0 auto;padding:0 24px 80px;">
+    {% for announcement in announcements %}
+    <div class="promo-banner reveal">
+      <div class="promo-content">
+        <span class="promo-tag">Limited Time Offer</span>
+        <h2 class="promo-title">{{ announcement.title|safe }}</h2>
+        <p class="promo-desc">{{ announcement.content }}</p>
+        <button class="btn-white">Shop Now</button>
+      </div>
+      <div class="promo-visual">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="25" fill="#fff" opacity="0.2"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.7" transform="rotate(0,70,70)"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.65" transform="rotate(60,70,70)"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.65" transform="rotate(120,70,70)"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.65" transform="rotate(180,70,70)"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.65" transform="rotate(240,70,70)"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.65" transform="rotate(300,70,70)"/>
+          <circle cx="70" cy="70" r="16" fill="#f5c6d0" opacity="0.9"/>
+          <circle cx="70" cy="70" r="8" fill="#c2637a"/>
+        </svg>
+      </div>
+    </div>
+    {% empty %}
+    <div class="promo-banner reveal">
+      <div class="promo-content">
+        <span class="promo-tag">Limited Time Offer</span>
+        <h2 class="promo-title">Mother's Day Special<br/>Bouquets Are Here</h2>
+        <p class="promo-desc">Give mom the gift she truly deserves. Our exclusive arrangements start at just Rs. 1,299.</p>
+        <button class="btn-white">Shop Now</button>
+      </div>
+      <div class="promo-visual">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="25" fill="#fff" opacity="0.2"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.7" transform="rotate(0,70,70)"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.65" transform="rotate(60,70,70)"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.65" transform="rotate(120,70,70)"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.65" transform="rotate(180,70,70)"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.65" transform="rotate(240,70,70)"/>
+          <ellipse cx="70" cy="28" rx="16" ry="30" fill="#fff" opacity="0.65" transform="rotate(300,70,70)"/>
+          <circle cx="70" cy="70" r="16" fill="#f5c6d0" opacity="0.9"/>
+          <circle cx="70" cy="70" r="8" fill="#c2637a"/>
+        </svg>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- WHY US / FEATURES -->
+  <div id="about" style="background:var(--warm-white);padding:80px 0 0;">
+    <section class="section" style="padding-top:0;">
+      <div class="section-header reveal">
+        <div class="section-tag">Why Choose Florista</div>
+        <h2 class="section-title">We Deliver More Than Flowers</h2>
+        <p class="section-desc">Quality, freshness, and happiness guaranteed with every order.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal" style="transition-delay:0.05s;">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="feature-title">100% Fresh Guarantee</div>
+          <div class="feature-desc">All flowers are sourced daily from local farms and certified growers.</div>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.1s;">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="feature-title">Same Day Delivery</div>
+          <div class="feature-desc">Order before 2 PM and receive your flowers the very same day.</div>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.15s;">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div class="feature-title">Made with Love</div>
+          <div class="feature-desc">Every bouquet is handcrafted by our expert florists with personal care.</div>
+        </div>
+        <div class="feature-card reveal" style="transition-delay:0.2s;">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="feature-title">Citywide Delivery</div>
+          <div class="feature-desc">We deliver across all major areas of your city with care and on time.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- TESTIMONIALS + FEEDBACK -->
+  <div class="feedback-wrap" id="contact">
+    <section class="section" style="padding-bottom:0;">
+      <div class="section-header reveal">
+        <div class="section-tag">Customer Love</div>
+        <h2 class="section-title">What Our Customers Say</h2>
+      </div>
+      <div class="testimonials-grid">
+        {% for fb in approved_feedbacks %}
+        <div class="testimonial-card reveal">
+          <div class="testi-quote">"</div>
+          <p class="testi-text">{{ fb.message }}</p>
+          <div class="testi-author">
+            <div class="testi-avatar">{{ fb.name|first|upper }}</div>
+            <div>
+              <div class="testi-name">{{ fb.name }}</div>
+              <div class="testi-role">{{ fb.rating }}/5 Rating</div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p>No approved feedback yet.</p>
+        {% endfor %}
+      </div>
+
+      <!-- Feedback Form -->
+      <div style="padding:60px 0 80px;">
+        <div class="feedback-form-wrap reveal">
+          <div class="feedback-layout">
+            <div class="feedback-copy">
+              <span class="feedback-pill">Quick Feedback</span>
+              <h3 class="form-title">Tell Us How Your Florista Experience Felt</h3>
+              <p class="form-desc">Loved the bouquet, delivery, or packaging? Share your thoughts so we can keep making every order better.</p>
+              <div class="feedback-points">
+                <div class="feedback-point">Fresh flowers every day</div>
+                <div class="feedback-point">Fast support and delivery</div>
+                <div class="feedback-point">Your review helps other buyers</div>
+              </div>
+            </div>
+            <form method="post" action="{% url 'submit_feedback' %}" class="feedback-form-card">
+              {% csrf_token %}
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Your Name</label>
+                  {{ feedback_form.name }}
+                </div>
+                <div class="form-group">
+                  <label>Email Address</label>
+                  {{ feedback_form.email }}
+                </div>
+              </div>
+              <div class="form-group form-full">
+                <label>Your Rating</label>
+                <input type="hidden" name="rating" id="ratingInput" value="5">
+                <div class="rating-stars" id="ratingStars" aria-label="Select rating">
+                  <button type="button" class="rating-star active" data-value="1" aria-label="1 star">★</button>
+                  <button type="button" class="rating-star active" data-value="2" aria-label="2 stars">★</button>
+                  <button type="button" class="rating-star active" data-value="3" aria-label="3 stars">★</button>
+                  <button type="button" class="rating-star active" data-value="4" aria-label="4 stars">★</button>
+                  <button type="button" class="rating-star active" data-value="5" aria-label="5 stars">★</button>
+                </div>
+                {% if feedback_form.rating.errors %}<div class="auth-error">{{ feedback_form.rating.errors }}</div>{% endif %}
+              </div>
+              <div class="form-group form-full" style="margin-bottom:16px;">
+                <label>Your Feedback</label>
+                {{ feedback_form.message }}
+              </div>
+              <button class="form-submit feedback-submit" type="submit">Send My Feedback</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- NEWSLETTER -->
+  <div class="newsletter-wrap">
+    <div class="newsletter-inner reveal">
+      <div class="section-tag">Stay in Bloom</div>
+      <h2 class="section-title" style="text-align:center;">Get Floral Inspiration</h2>
+      <p class="section-desc">Subscribe for seasonal offers, care tips, and exclusive deals delivered to your inbox.</p>
+      <div class="newsletter-form">
+        <input type="email" placeholder="Enter your email address"/>
+        <button class="btn-primary">Subscribe</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo">FLORIST<span>A</span></a>
+        <p class="footer-about">Bringing beauty and joy through handcrafted floral arrangements since 2018. Every bloom tells a story, and we help you tell yours.</p>
+        <div class="footer-social">
+          <button class="social-btn" title="Facebook">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+          </button>
+          <button class="social-btn" title="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </button>
+          <button class="social-btn" title="Twitter">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+          </button>
+          <button class="social-btn" title="Pinterest">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.65 7.86 6.39 9.29-.09-.78-.17-1.98.03-2.83l1.22-5.17s-.31-.62-.31-1.54c0-1.45.84-2.53 1.88-2.53.89 0 1.32.67 1.32 1.47 0 .9-.57 2.24-.87 3.48-.25 1.04.52 1.88 1.54 1.88 1.85 0 3.1-2.37 3.1-5.17 0-2.14-1.44-3.64-3.5-3.64-2.38 0-3.78 1.79-3.78 3.63 0 .72.28 1.49.62 1.91a.25.25 0 0 1 .06.24l-.23.95c-.04.14-.12.17-.28.1-1.04-.48-1.69-2-1.69-3.22 0-2.62 1.9-5.03 5.49-5.03 2.88 0 5.12 2.05 5.12 4.79 0 3.14-1.98 5.66-4.72 5.66-.92 0-1.79-.48-2.09-1.04l-.57 2.13c-.2.79-.76 1.78-1.14 2.38.86.27 1.77.41 2.71.41 5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#shop">Shop</a></li>
+          <li><a href="#about">About Us</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Categories</h4>
+        <ul>
+          <li><a href="#">Roses</a></li>
+          <li><a href="#">Sunflowers</a></li>
+          <li><a href="#">Lavender</a></li>
+          <li><a href="#">Indoor Plants</a></li>
+          <li><a href="#">Gift Bouquets</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <ul>
+          <li><a href="#">hello@florista.pk</a></li>
+          <li><a href="#">+92 300 1234567</a></li>
+          <li><a href="#">Lahore, Pakistan</a></li>
+          <li><a href="#">Mon - Sat: 9am - 8pm</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2025 Florista. All rights reserved.</span>
+      <span>Made with care for flower lovers everywhere.</span>
+    </div>
+  </footer>
+
+  {{ products_search_data|json_script:"products-search-data" }}
+  <script>
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open');
+    });
+
+    const searchBtn = document.getElementById('searchBtn');
+    const searchOverlay = document.getElementById('searchOverlay');
+    const searchClose = document.getElementById('searchClose');
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    const searchLabel = document.getElementById('searchLabel');
+    const allProducts = JSON.parse(document.getElementById('products-search-data').textContent);
+    const popularSearches = allProducts.slice(0, 4);
+
+    function renderResults(items) {
+      if (items.length === 0) {
+        searchResults.innerHTML = '<div class="search-empty">No results found. Try a different search.</div>';
+        return;
+      }
+      searchResults.innerHTML = items.map(item => `
+        <div class="search-item" data-product-id="${item.id}">
+          <div class="search-thumb">
+            <svg width="24" height="24" viewBox="0 0 40 40"><circle cx="20" cy="20" r="7" fill="#c2637a"/></svg>
+          </div>
+          <div class="search-item-info">
+            <div class="search-item-name">${item.name}</div>
+            <div class="search-item-price">${item.price} &middot; ${item.type}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openProductFromSearch(productId) {
+      const card = document.getElementById(`product-${productId}`);
+      if (!card) return;
+      searchOverlay.classList.remove('active');
+      searchInput.value = '';
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.style.boxShadow = '0 0 0 3px rgba(194, 99, 122, 0.35)';
+      setTimeout(() => { card.style.boxShadow = ''; }, 1500);
+    }
+
+    searchBtn.addEventListener('click', () => {
+      searchOverlay.classList.add('active');
+      searchLabel.textContent = 'Popular Searches';
+      renderResults(popularSearches);
+      setTimeout(() => searchInput.focus(), 100);
+    });
+    searchClose.addEventListener('click', () => {
+      searchOverlay.classList.remove('active');
+      searchInput.value = '';
+    });
+    searchOverlay.addEventListener('click', (e) => {
+      if (e.target === searchOverlay) searchOverlay.classList.remove('active');
+    });
+    searchInput.addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      const filtered = q ? allProducts.filter(p => p.name.toLowerCase().includes(q) || p.type.toLowerCase().includes(q)) : popularSearches;
+      searchLabel.textContent = q ? 'Search Results' : 'Popular Searches';
+      renderResults(filtered);
+    });
+    searchResults.addEventListener('click', (e) => {
+      const item = e.target.closest('.search-item');
+      if (!item) return;
+      openProductFromSearch(Number(item.dataset.productId));
+    });
+
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => observer.observe(el));
+
+    const ratingInput = document.getElementById('ratingInput');
+    const ratingStars = document.querySelectorAll('#ratingStars .rating-star');
+    function paintStars(value) {
+      ratingStars.forEach(star => {
+        star.classList.toggle('active', Number(star.dataset.value) <= value);
+      });
+    }
+    ratingStars.forEach(star => {
+      star.addEventListener('mouseenter', () => paintStars(Number(star.dataset.value)));
+      star.addEventListener('click', () => {
+        ratingInput.value = star.dataset.value;
+        paintStars(Number(star.dataset.value));
+      });
+    });
+    const ratingWrap = document.getElementById('ratingStars');
+    if (ratingWrap) {
+      ratingWrap.addEventListener('mouseleave', () => paintStars(Number(ratingInput.value || 5)));
+      paintStars(Number(ratingInput.value || 5));
+    }
+  </script>
+</body>
+</html>

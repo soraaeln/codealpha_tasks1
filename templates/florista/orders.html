@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+{% load static %}
+{% load tz %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Florista</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+<section class="orders-section">
+
+    <div class="orders-top">
+
+        <h1 class="orders-title">
+            My Orders
+        </h1>
+
+        <a href="{% url 'home' %}" class="back-btn">
+            Continue Shopping
+        </a>
+
+    </div>
+
+    {% if orders %}
+
+        <div class="orders-grid">
+
+            {% for order in orders %}
+
+            <div class="order-card">
+
+                <div class="order-header">
+
+                    <div>
+                        <h2>
+                            Order #{{ order.id }}
+                        </h2>
+
+                        <p class="order-date">
+                            {{ order.created_at|localtime|date:"d M Y, h:i A" }}
+                        </p>
+                    </div>
+
+                    <div class="status-badge">
+                        {{ order.status }}
+                    </div>
+
+                </div>
+
+                <div class="order-info">
+
+                    <p>
+                        <strong>Total:</strong>
+                        Rs. {{ order.total_amount }}
+                    </p>
+
+                    <p>
+                        <strong>Payment:</strong>
+                        {{ order.get_payment_method_display }}
+                    </p>
+                    
+
+                </div>
+               
+<div class="order-actions">
+
+    {% if order.status == 'pending' or order.status == 'processing' %}
+    <form method="post" action="{% url 'cancel_order' order.id %}">
+        {% csrf_token %}
+        <button class="cancel-btn">Cancel Order</button>
+    </form>
+    {% endif %}
+
+</div>
+
+                <div class="items-box">
+
+                    {% for item in order.items.all %}
+
+                    <div class="item-row">
+
+                        <span>
+                            {{ item.product.name }} × {{ item.quantity }}
+                        </span>
+
+                        <span>
+                            Rs. {{ item.line_total }}
+                        </span>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-orders">
+
+            <h2>No Orders Yet</h2>
+
+            <p>
+                Start shopping beautiful flowers 🌸
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+</body>
+</html>
