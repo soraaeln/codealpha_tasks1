@@ -34,8 +34,8 @@ This project was created as part of learning and internship practice to strength
 
 
 ## 🚀 How to Run This Project
-run following command on your baah 
-python manage.py runserver
+run following command on your bash 
+(python manage.py runserver)
 http://127.0.0.1:8000/
 
 
