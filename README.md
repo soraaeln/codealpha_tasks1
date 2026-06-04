@@ -48,3 +48,9 @@ This project is part of my learning journey in Django development.
 
 <img width="947" height="416" alt="image" src="https://github.com/user-attachments/assets/69c911ce-5c8b-4c18-a551-d09d8750141c" />
 
+
+
+
+
+<img width="947" height="413" alt="image" src="https://github.com/user-attachments/assets/64dbc8b4-8154-49d5-bfa9-a0a7dc753a37" />
+
