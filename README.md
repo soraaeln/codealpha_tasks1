@@ -42,3 +42,9 @@ http://127.0.0.1:8000/
 🌸 A simple and elegant flower shop interface designed for smooth user experience.
 Thanks for checking out Florista 🌸
 This project is part of my learning journey in Django development.
+
+
+
+
+<img width="947" height="416" alt="image" src="https://github.com/user-attachments/assets/69c911ce-5c8b-4c18-a551-d09d8750141c" />
+
