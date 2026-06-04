@@ -34,9 +34,23 @@ This project was created as part of learning and internship practice to strength
 
 
 ## 🚀 How to Run This Project
-run following command on your bash 
-(python manage.py runserver)
+
+Follow these steps to run the project locally:
+
+### Clone the repository
+```bash
+git clone https://github.com/soraaeln/codealpha_tasks1.git```
+
+```
+### Move to project directory
+cd codealpha_tasks1
+
+### Start server
+python manage.py runserver
+
+### Open in browser
 http://127.0.0.1:8000/
+
 
 
 🌸 A simple and elegant flower shop interface designed for smooth user experience.
